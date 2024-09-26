@@ -1,54 +1,70 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import random
 
 def get_datapoints() -> list:
-    path = "datapoints.txt"
+    file_name = "datapoints.txt"
+
+    # Initialize empty list
     datapoints = []
 
-    with open(path, 'r') as file:
+    with open(file_name, "r") as file:
         for line in file:
             if not line[0].isdigit(): # Ignore row if first character is not digit. (This ignores header row)
                 continue
 
-            width, height, label = [value.strip() for value in line.split(',')]
+            # Get the values for width, height, label from the line
+            width, height, label = [value.strip() for value in line.split(",")]
+
+            # Format the values to correct type
             width = float(width)
             height = float(height)
             label = int(label)
 
-            entry = { "width": width, "height": height, "label": label }
-            datapoints.append(entry)
+            # Append dictonary of datapoint to the list of points
+            datapoints.append({ "width": width, "height": height, "label": label })
 
+    # Return the full list of datapoints collected from the file
     return datapoints
 
+a = get_datapoints()
 
 def get_testpoints() -> list:
-    path = "testpoints.txt"
+    file_name = "testpoints.txt"
+
+    # Initialize empty list
     testpoints = []
 
-    with open(path, 'r') as file:
+    with open(file_name, "r") as file:
         for line in file:
             if not line[0].isdigit(): # Ignore row if first character is not digit. (This ignores header row)
                 continue
             
-            point = line.split('(')[1].split(')')[0] # Get the point inside the parentheses
-            width, height = [float(value) for value in point.split(',')]
+            point = line.split("(")[1].split(")")[0] # Get the point inside the parentheses
+
+            # Get the values for width and height, and format as float
+            width, height = [float(value) for value in point.split(",")]
             
-            entry = { "width": width, "height": height }
-            testpoints.append(entry)
+            # Append dictonary of datapoint to the list of points
+            testpoints.append({ "width": width, "height": height })
     
+    # Return the full list of testpoints collected from the file
     return testpoints
 
 
-def plot_datapoints(datapoints) -> None:
+def scatter_plot_datapoints(datapoints) -> None:
     for d in datapoints:
-        x, y, is_pikachu = d["width"], d["height"], d["label"] == 1
+        scatter_color = "black"
+        if "label" in d:
+            if d["label"] == 1:
+                scatter_color = "blue"
+            elif d["label"] == 0:
+                scatter_color = "red"
 
-        color = "red"
-        if is_pikachu:
-            color = "blue"
+        plt.scatter(x=d["width"], y=d["height"], color=scatter_color)
 
-        plt.scatter(x, y, color=color)
-
+    plt.ylabel("Height")
+    plt.xlabel("Width")
     plt.show()
 
 
@@ -67,7 +83,7 @@ def classify_testpoint(point: tuple, datapoints: list) -> str:
         if not closest_point or distance < closest_point["distance"]:
             closest_point = { "distance": distance, "label": datapoint["label"] }
     
-    return None if not closest_point else 'Pikachu' if closest_point["label"] == 1 else 'Pichu'
+    return None if not closest_point else "Pikachu" if closest_point["label"] == 1 else "Pichu"
 
 
 def output_classification_for_testpoints(testpoints: list, datapoints: list) -> None:
@@ -77,3 +93,106 @@ def output_classification_for_testpoints(testpoints: list, datapoints: list) -> 
         classification = classify_testpoint(point, datapoints)
 
         print(f"Sample with (width, height): {point} classified as {classification}")
+
+
+def split_source_data_into_training_and_test(source_data: list) -> tuple:
+    random.shuffle(source_data)
+
+    pikachu_data = []
+    pichu_data = []
+    for datapoint in source_data:
+        if datapoint["label"] == 1:
+            pikachu_data.append(datapoint)
+        elif datapoint["label"] == 0:
+            pichu_data.append(datapoint)
+
+    train_data, test_data = pikachu_data[:50] + pichu_data[:50], pikachu_data[50:75] + pichu_data[50:75]
+
+    random.shuffle(train_data)
+    random.shuffle(test_data)
+
+    return (train_data, test_data)
+
+
+def get_user_input_pokemon_height():
+    while True:
+        height = input("Input the height of the pokemon: ")
+        try:
+            height = float(height)
+            if height < 0:
+                print("Height of the pokemon cannot be negative")
+                continue
+
+        except ValueError as err:
+            print("Height of the pokemon must be a number")
+            continue
+
+        return height
+
+
+def get_user_input_pokemon_width():
+    while True:
+        width = input("Input the width of the pokemon: ")
+        try:
+            width = float(width)
+            if width < 0:
+                print("Width of the pokemon cannot be negative")
+                continue
+
+        except ValueError as err:
+            print("Width of the pokemon must be a number")
+            continue
+
+        return width
+
+
+def get_k_nearest_neighbors(P1, points, k):
+    closest_points = []
+    for point in points:
+        P2 = (point["width"], point["height"])
+        distance = get_distance_between_points(P1, P2)
+
+        if len(closest_points) < k:
+            closest_points.append({ "distance": distance, "label": point["label"] })
+
+        elif distance < closest_points[0]["distance"]:
+            closest_points[0] = { "distance": distance, "label": point["label"] }
+
+        closest_points = sorted(closest_points, key=lambda d: d["distance"], reverse=True)
+    
+    return closest_points
+
+
+def get_accuracy_from_random_data_split():
+    source_data = get_datapoints()
+
+    training_points, test_points = split_source_data_into_training_and_test(source_data)
+
+    number_of_TP = 0
+    number_of_TN = 0
+    total_number = 0
+
+    for test in test_points:
+        point = (test["width"], test["height"])
+        ten_closest_datapoints = get_k_nearest_neighbors(point, training_points, 10)
+
+        amount_pikachu = 0
+        amount_pichu = 0
+        for close_point in ten_closest_datapoints:
+            if close_point["label"] == 1:
+                amount_pikachu += 1
+            elif close_point["label"] == 0:
+                amount_pichu += 1
+
+        guessed_label = 1 if amount_pikachu > amount_pichu else 0
+        correct_label = test["label"]
+
+        total_number += 1
+        if guessed_label == 1 and correct_label == 1:
+            number_of_TP += 1
+        elif guessed_label == 0 and correct_label == 0:
+            number_of_TN += 1
+
+    accuracy = (number_of_TP + number_of_TN) / total_number
+
+    return accuracy
