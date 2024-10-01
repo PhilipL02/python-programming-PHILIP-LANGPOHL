@@ -60,12 +60,19 @@ def get_testpoints() -> list:
     return testpoints
 
 
+def get_pikachu_points_by_label(points):
+    return [d for d in points if d["label"] == 1]
+
+
+def get_pichu_points_by_label(points):
+    return [d for d in points if d["label"] == 0]
+
+
 def scatter_plot_datapoints(datapoints) -> None:
     fig, ax = plt.figure(dpi=100), plt.axes()
 
-    pikachus = [d for d in datapoints if d["label"] == 1]
-    pichus = [d for d in datapoints if d["label"] == 0]
-
+    pikachus = get_pikachu_points_by_label(datapoints)
+    pichus = get_pichu_points_by_label(datapoints)
 
     ax.scatter([d["width"] for d in pikachus], [d["height"] for d in pikachus], alpha=0.5, c="blue")
     ax.scatter([d["width"] for d in pichus], [d["height"] for d in pichus], alpha=0.5, c="red")
