@@ -1,9 +1,16 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import random
+import os.path
+
+def check_path_exists(path):
+    return os.path.exists(path)
+
 
 def get_datapoints() -> list:
     file_name = "datapoints.txt"
+    if not check_path_exists(file_name):
+        file_name = "Labs/Lab2/" + file_name
 
     # Initialize empty list
     datapoints = []
@@ -27,10 +34,11 @@ def get_datapoints() -> list:
     # Return the full list of datapoints collected from the file
     return datapoints
 
-a = get_datapoints()
 
 def get_testpoints() -> list:
     file_name = "testpoints.txt"
+    if not check_path_exists(file_name):
+        file_name = "Labs/Lab2/" + file_name
 
     # Initialize empty list
     testpoints = []
@@ -53,18 +61,16 @@ def get_testpoints() -> list:
 
 
 def scatter_plot_datapoints(datapoints) -> None:
-    for d in datapoints:
-        scatter_color = "black"
-        if "label" in d:
-            if d["label"] == 1:
-                scatter_color = "blue"
-            elif d["label"] == 0:
-                scatter_color = "red"
+    fig, ax = plt.figure(dpi=100), plt.axes()
 
-        plt.scatter(x=d["width"], y=d["height"], color=scatter_color)
+    pikachus = [d for d in datapoints if d["label"] == 1]
+    pichus = [d for d in datapoints if d["label"] == 0]
 
-    plt.ylabel("Height")
-    plt.xlabel("Width")
+
+    ax.scatter([d["width"] for d in pikachus], [d["height"] for d in pikachus], alpha=0.5, c="blue")
+    ax.scatter([d["width"] for d in pichus], [d["height"] for d in pichus], alpha=0.5, c="red")
+    ax.set(xlabel="Width (cm)", ylabel="Height (cm)", title="Height and width for pokemons")
+    ax.legend(("Pikachu", "Pichu"))
     plt.show()
 
 
@@ -147,20 +153,8 @@ def get_user_input_pokemon_width():
 
 
 def get_k_nearest_neighbors(P1, points, k):
-    closest_points = []
-    for point in points:
-        P2 = (point["width"], point["height"])
-        distance = get_distance_between_points(P1, P2)
-
-        if len(closest_points) < k:
-            closest_points.append({ "distance": distance, "label": point["label"] })
-
-        elif distance < closest_points[0]["distance"]:
-            closest_points[0] = { "distance": distance, "label": point["label"] }
-
-        closest_points = sorted(closest_points, key=lambda d: d["distance"], reverse=True)
-    
-    return closest_points
+    sorted_by_distance = sorted(points, key=lambda point: get_distance_between_points(P1, (point["width"], point["height"])))
+    return sorted_by_distance[:k]
 
 
 def get_accuracy_from_random_data_split():
@@ -174,17 +168,19 @@ def get_accuracy_from_random_data_split():
 
     for test in test_points:
         point = (test["width"], test["height"])
-        ten_closest_datapoints = get_k_nearest_neighbors(point, training_points, 10)
+
+        # The exercise said to use the 10 closest points, but I chose 9 to avoid equal split in the classification (5 Pichu, 5 Pikachu)
+        closest_datapoints = get_k_nearest_neighbors(point, training_points, k=9)
 
         amount_pikachu = 0
         amount_pichu = 0
-        for close_point in ten_closest_datapoints:
+        for close_point in closest_datapoints:
             if close_point["label"] == 1:
                 amount_pikachu += 1
             elif close_point["label"] == 0:
                 amount_pichu += 1
 
-        guessed_label = 1 if amount_pikachu > amount_pichu else 0
+        guessed_label = None if amount_pikachu == amount_pichu else 1 if amount_pikachu > amount_pichu else 0
         correct_label = test["label"]
 
         total_number += 1
