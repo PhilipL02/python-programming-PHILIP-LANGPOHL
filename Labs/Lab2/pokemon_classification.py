@@ -11,9 +11,9 @@ testpoints = get_testpoints()
 output_classification_for_testpoints(testpoints, datapoints)
 
 # Let user input height and weight and create point of input values
-user_pokemon_height = get_user_input_pokemon_height()
 user_pokemon_width = get_user_input_pokemon_width()
-user_point = (user_pokemon_height, user_pokemon_width)
+user_pokemon_height = get_user_input_pokemon_height()
+user_point = (user_pokemon_width, user_pokemon_height)
 
 # The exercise said to use the 10 closest points, but I chose 9 to avoid equal split in the classification (5 Pichu, 5 Pikachu)
 classified_label = get_classified_label_by_k_nearest_neighbors(user_point, datapoints, k=9)
