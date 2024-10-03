@@ -6,6 +6,7 @@ import numpy as np
 import random
 import os.path
 
+# Constants representing the labels for different Pokémon.
 PIKACHU_LABEL = 1
 PICHU_LABEL = 0
 
@@ -67,6 +68,7 @@ def get_testpoints() -> list:
 def scatter_plot_datapoints(datapoints) -> None:
     fig, ax = plt.figure(dpi=100, num="Height and width for pokemons"), plt.axes()
 
+    # Get the Pikachus and Pichus in seperate lists
     pikachus = [d for d in datapoints if d["label"] == PIKACHU_LABEL]
     pichus = [d for d in datapoints if d["label"] == PICHU_LABEL]
 
@@ -102,8 +104,8 @@ def split_data_into_train_and_test(data: list) -> tuple:
     random.shuffle(data)
 
     # Separate the data by labels
-    pikachu_data = [point for point in data if point["label"] == PIKACHU_LABEL]
-    pichu_data = [point for point in data if point["label"] == PICHU_LABEL]
+    pikachu_data = [d for d in data if d["label"] == PIKACHU_LABEL]
+    pichu_data = [d for d in data if d["label"] == PICHU_LABEL]
 
     # Train data should be the first 50 Pikachus and 50 Pichus
     train_data = pikachu_data[:50] + pichu_data[:50]
@@ -151,7 +153,7 @@ def get_user_input_pokemon_width() -> float:
 
 def get_k_nearest_neighbors(P1, points, k) -> list:
     # Sort the points in ascending order based on their distance from point P1, with the closest point first
-    sorted_points_by_distance = sorted(points, key=lambda point: get_distance_between_points(P1, (point["width"], point["height"])))
+    sorted_points_by_distance = sorted(points, key=lambda d: get_distance_between_points(P1, (d["width"], d["height"])))
     return sorted_points_by_distance[:k]
 
 
@@ -164,17 +166,17 @@ def get_accuracy_from_random_data_split() -> float:
     number_of_TN = 0
     total_number = 0
 
-    for point_data in test_data:
-        point = (point_data["width"], point_data["height"])
+    for data_point in test_data:
+        point = (data_point["width"], data_point["height"])
 
         # The exercise said to use the 10 closest points, but I chose 9 to avoid equal split in the classification (5 Pichu, 5 Pikachu)
         guessed_label = get_classified_label_by_k_nearest_neighbors(point, train_data, k=9)
-        correct_label = point_data["label"]
+        correct_label = data_point["label"]
 
         total_number += 1
-        if guessed_label == 1 and correct_label == 1:
+        if guessed_label == 1 and correct_label == 1: # Actual Pikachu and predicted Pikachu
             number_of_TP += 1
-        elif guessed_label == 0 and correct_label == 0:
+        elif guessed_label == 0 and correct_label == 0: # Actual Pichu and predicted Pichu
             number_of_TN += 1
 
     accuracy = (number_of_TP + number_of_TN) / total_number
@@ -185,12 +187,16 @@ def get_accuracy_from_random_data_split() -> float:
 def get_classified_label_by_k_nearest_neighbors(point, train_data, k=9) -> int:
     nearest_points = get_k_nearest_neighbors(point, train_data, k)
 
+    # Create a dictionary to count the occurrences of each label among the nearest points.
     labels_counter = {}
-    for near_point in nearest_points:
-        label = near_point["label"]
+    for data_point in nearest_points:
+        label = data_point["label"]
+
+        # Initialize the label count if it doesn't exist in the dictionary.
         if not label in labels_counter:
             labels_counter[label] = 0
 
         labels_counter[label] += 1
 
+    # Return the label that has the highest count among the nearest points.
     return max(labels_counter, key=labels_counter.get)
