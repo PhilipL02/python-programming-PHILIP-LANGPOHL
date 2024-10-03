@@ -103,7 +103,7 @@ def split_data_into_train_and_test(datapoints: list) -> tuple:
     pikachu_data = [d for d in datapoints if d["label"] == PIKACHU_LABEL]
     pichu_data = [d for d in datapoints if d["label"] == PICHU_LABEL]
 
-    # Sort Pikachus and Pichus to get different train and test data every time
+    # Shuffle Pikachus and Pichus to get different train and test data every time
     random.shuffle(pikachu_data)
     random.shuffle(pichu_data)
 
