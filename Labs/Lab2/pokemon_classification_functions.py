@@ -1,18 +1,19 @@
+# This file contains functions used in the main script.
+# It does not execute any code by itself.
+
 import matplotlib.pyplot as plt
 import numpy as np
 import random
 import os.path
 
-def check_path_exists(path):
-    return os.path.exists(path)
-
 
 def get_datapoints() -> list:
     file_name = "datapoints.txt"
-    if not check_path_exists(file_name):
+    # Handles both if function is called from py and ipynb file.
+    if not os.path.exists(file_name):
         file_name = "Labs/Lab2/" + file_name
 
-    # Initialize empty list
+    # Initialize empty list to store the points from the file
     datapoints = []
 
     with open(file_name, "r") as file:
@@ -37,10 +38,11 @@ def get_datapoints() -> list:
 
 def get_testpoints() -> list:
     file_name = "testpoints.txt"
-    if not check_path_exists(file_name):
+    # Handles both if function is called from py and ipynb file.
+    if not os.path.exists(file_name):
         file_name = "Labs/Lab2/" + file_name
 
-    # Initialize empty list
+    # Initialize empty list to store the points from the file
     testpoints = []
 
     with open(file_name, "r") as file:
@@ -60,22 +62,15 @@ def get_testpoints() -> list:
     return testpoints
 
 
-def get_pikachu_points_by_label(points):
-    return [d for d in points if d["label"] == 1]
-
-
-def get_pichu_points_by_label(points):
-    return [d for d in points if d["label"] == 0]
-
-
 def scatter_plot_datapoints(datapoints) -> None:
-    fig, ax = plt.figure(dpi=100), plt.axes()
+    fig, ax = plt.figure(dpi=100, num="Height and width for pokemons"), plt.axes()
 
-    pikachus = get_pikachu_points_by_label(datapoints)
-    pichus = get_pichu_points_by_label(datapoints)
+    pikachus = [d for d in datapoints if d["label"] == 1]
+    pichus = [d for d in datapoints if d["label"] == 0]
 
-    ax.scatter([d["width"] for d in pikachus], [d["height"] for d in pikachus], alpha=0.5, c="blue")
-    ax.scatter([d["width"] for d in pichus], [d["height"] for d in pichus], alpha=0.5, c="red")
+    # Scatter Pikachus in blue color and Pichus in red color
+    ax.scatter([d["width"] for d in pikachus], [d["height"] for d in pikachus], alpha=0.6, c="blue")
+    ax.scatter([d["width"] for d in pichus], [d["height"] for d in pichus], alpha=0.6, c="red")
     ax.set(xlabel="Width (cm)", ylabel="Height (cm)", title="Height and width for pokemons")
     ax.legend(("Pikachu", "Pichu"))
     plt.show()
@@ -85,25 +80,16 @@ def get_distance_between_points(P1: tuple, P2: tuple) -> float:
     x1, y1 = P1
     x2, y2 = P2
     
+    # Return the Euclidean distance between the points
     return np.sqrt((np.square(x2 - x1) + np.square(y2 - y1)))
-
-
-def classify_testpoint(point: tuple, datapoints: list) -> str:
-    closest_point = None
-    for datapoint in datapoints:
-        P2 = (datapoint["width"], datapoint["height"])
-        distance = get_distance_between_points(point, P2)
-        if not closest_point or distance < closest_point["distance"]:
-            closest_point = { "distance": distance, "label": datapoint["label"] }
-    
-    return None if not closest_point else "Pikachu" if closest_point["label"] == 1 else "Pichu"
 
 
 def output_classification_for_testpoints(testpoints: list, datapoints: list) -> None:
     for testpoint in testpoints:
         point = (testpoint["width"], testpoint["height"])
-        
-        classification = classify_testpoint(point, datapoints)
+
+        classified_label = get_classified_label_by_k_nearest_neighbors(point, datapoints, k=1)
+        classification = "Pikachu" if classified_label == 1 else "Pichu"
 
         print(f"Sample with (width, height): {point} classified as {classification}")
 
@@ -127,7 +113,7 @@ def split_source_data_into_training_and_test(source_data: list) -> tuple:
     return (train_data, test_data)
 
 
-def get_user_input_pokemon_height():
+def get_user_input_pokemon_height() -> list:
     while True:
         height = input("Input the height of the pokemon: ")
         try:
@@ -143,7 +129,7 @@ def get_user_input_pokemon_height():
         return height
 
 
-def get_user_input_pokemon_width():
+def get_user_input_pokemon_width() -> float:
     while True:
         width = input("Input the width of the pokemon: ")
         try:
@@ -159,9 +145,10 @@ def get_user_input_pokemon_width():
         return width
 
 
-def get_k_nearest_neighbors(P1, points, k):
-    sorted_by_distance = sorted(points, key=lambda point: get_distance_between_points(P1, (point["width"], point["height"])))
-    return sorted_by_distance[:k]
+def get_k_nearest_neighbors(P1, points, k) -> list:
+    # Sort the points in ascending order based on their distance from point P1, with the closest point first
+    sorted_points_by_distance = sorted(points, key=lambda point: get_distance_between_points(P1, (point["width"], point["height"])))
+    return sorted_points_by_distance[:k]
 
 
 def get_accuracy_from_random_data_split():
@@ -177,17 +164,7 @@ def get_accuracy_from_random_data_split():
         point = (test["width"], test["height"])
 
         # The exercise said to use the 10 closest points, but I chose 9 to avoid equal split in the classification (5 Pichu, 5 Pikachu)
-        closest_datapoints = get_k_nearest_neighbors(point, training_points, k=9)
-
-        amount_pikachu = 0
-        amount_pichu = 0
-        for close_point in closest_datapoints:
-            if close_point["label"] == 1:
-                amount_pikachu += 1
-            elif close_point["label"] == 0:
-                amount_pichu += 1
-
-        guessed_label = None if amount_pikachu == amount_pichu else 1 if amount_pikachu > amount_pichu else 0
+        guessed_label = get_classified_label_by_k_nearest_neighbors(point, training_points, k=9)
         correct_label = test["label"]
 
         total_number += 1
@@ -199,3 +176,17 @@ def get_accuracy_from_random_data_split():
     accuracy = (number_of_TP + number_of_TN) / total_number
 
     return accuracy
+
+
+def get_classified_label_by_k_nearest_neighbors(point, training_points, k=9) -> int:
+    nearest_points = get_k_nearest_neighbors(point, training_points, k)
+
+    labels_counter = {}
+    for near_point in nearest_points:
+        label = near_point["label"]
+        if not label in labels_counter:
+            labels_counter[label] = 0
+
+        labels_counter[label] += 1
+
+    return max(labels_counter, key=labels_counter.get)
