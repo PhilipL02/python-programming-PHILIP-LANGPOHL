@@ -34,4 +34,4 @@ ax.legend(loc='upper right')
 
 plt.show()
 
-print(f"The average accuracy is around {average_accuracy:.2f}")
+print(f"The average accuracy for {amount_of_attempts} attempts is around {average_accuracy:.2f}")
