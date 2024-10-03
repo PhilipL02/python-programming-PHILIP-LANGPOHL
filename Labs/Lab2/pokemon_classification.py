@@ -23,12 +23,12 @@ print(f"Your pokemon with (width, height): {user_point} classified as {classific
 # Test model with multiple attempts, get the accuracies and calculate average accuracy
 amount_of_attempts = 10
 attempts_indexes = range(amount_of_attempts)
-accuracies = [get_accuracy_from_random_data_split() for _ in attempts_indexes]
+accuracies = [get_accuracy_from_random_data_split(datapoints) for _ in attempts_indexes]
 average_accuracy = sum(accuracies) / len(accuracies)
 
 fig, ax = plt.figure(dpi=100, num="Accuracy for multiple attempts"), plt.axes()
 ax.plot(attempts_indexes, accuracies)
-ax.plot(attempts_indexes, [average_accuracy]*len(attempts_indexes), label='Mean', linestyle='--')
+ax.plot(attempts_indexes, [average_accuracy]*len(attempts_indexes), label='Average', linestyle='--')
 ax.set(xlabel="Attempt", ylabel="Accuracy", title="Accuracy for multiple attempts")
 ax.legend(loc='upper right')
 

@@ -65,7 +65,7 @@ def get_testpoints() -> list:
     return testpoints
 
 
-def scatter_plot_datapoints(datapoints) -> None:
+def scatter_plot_datapoints(datapoints: list) -> None:
     fig, ax = plt.figure(dpi=100, num="Height and width for pokemons"), plt.axes()
 
     # Get the Pikachus and Pichus in seperate lists
@@ -98,14 +98,14 @@ def output_classification_for_testpoints(testpoints: list, datapoints: list) -> 
         print(f"Sample with (width, height): {point} classified as {classification}")
 
 
-def split_data_into_train_and_test(data: list) -> tuple:
-    # Shuffle the data so different Pikachus and Pichus appear in the train/test data
-    # Otherwise the accuracy will be the same every attempt
-    random.shuffle(data)
+def split_data_into_train_and_test(datapoints: list) -> tuple:
+    # Separate the datapoints by labels
+    pikachu_data = [d for d in datapoints if d["label"] == PIKACHU_LABEL]
+    pichu_data = [d for d in datapoints if d["label"] == PICHU_LABEL]
 
-    # Separate the data by labels
-    pikachu_data = [d for d in data if d["label"] == PIKACHU_LABEL]
-    pichu_data = [d for d in data if d["label"] == PICHU_LABEL]
+    # Sort Pikachus and Pichus to get different train and test data every time
+    random.shuffle(pikachu_data)
+    random.shuffle(pichu_data)
 
     # Train data should be the first 50 Pikachus and 50 Pichus
     train_data = pikachu_data[:50] + pichu_data[:50]
@@ -151,15 +151,13 @@ def get_user_input_pokemon_width() -> float:
         return width
 
 
-def get_k_nearest_neighbors(P1, points, k) -> list:
+def get_k_nearest_neighbors(P1: tuple, points: list, k: int = 9) -> list:
     # Sort the points in ascending order based on their distance from point P1, with the closest point first
     sorted_points_by_distance = sorted(points, key=lambda d: get_distance_between_points(P1, (d["width"], d["height"])))
     return sorted_points_by_distance[:k]
 
 
-def get_accuracy_from_random_data_split() -> float:
-    datapoints = get_datapoints()
-
+def get_accuracy_from_random_data_split(datapoints: list) -> float:
     train_data, test_data = split_data_into_train_and_test(datapoints)
 
     number_of_TP = 0
@@ -184,7 +182,7 @@ def get_accuracy_from_random_data_split() -> float:
     return accuracy
 
 
-def get_classified_label_by_k_nearest_neighbors(point, train_data, k=9) -> int:
+def get_classified_label_by_k_nearest_neighbors(point: tuple, train_data: list, k: int = 9) -> int:
     nearest_points = get_k_nearest_neighbors(point, train_data, k)
 
     # Create a dictionary to count the occurrences of each label among the nearest points.
