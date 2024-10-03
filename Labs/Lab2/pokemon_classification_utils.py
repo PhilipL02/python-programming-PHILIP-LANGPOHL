@@ -1,4 +1,4 @@
-# This file contains functions used in the main script.
+# This file contains functions and constants used in the main script.
 # It does not execute any code by itself.
 
 import matplotlib.pyplot as plt
@@ -6,6 +6,8 @@ import numpy as np
 import random
 import os.path
 
+PIKACHU_LABEL = 1
+PICHU_LABEL = 0
 
 def get_datapoints() -> list:
     file_name = "datapoints.txt"
@@ -65,8 +67,8 @@ def get_testpoints() -> list:
 def scatter_plot_datapoints(datapoints) -> None:
     fig, ax = plt.figure(dpi=100, num="Height and width for pokemons"), plt.axes()
 
-    pikachus = [d for d in datapoints if d["label"] == 1]
-    pichus = [d for d in datapoints if d["label"] == 0]
+    pikachus = [d for d in datapoints if d["label"] == PIKACHU_LABEL]
+    pichus = [d for d in datapoints if d["label"] == PICHU_LABEL]
 
     # Scatter Pikachus in blue color and Pichus in red color
     ax.scatter([d["width"] for d in pikachus], [d["height"] for d in pikachus], alpha=0.6, c="blue")
@@ -89,23 +91,25 @@ def output_classification_for_testpoints(testpoints: list, datapoints: list) -> 
         point = (testpoint["width"], testpoint["height"])
 
         classified_label = get_classified_label_by_k_nearest_neighbors(point, datapoints, k=1)
-        classification = "Pikachu" if classified_label == 1 else "Pichu"
+        classification = "Pikachu" if classified_label == PIKACHU_LABEL else "Pichu"
 
         print(f"Sample with (width, height): {point} classified as {classification}")
 
 
-def split_source_data_into_training_and_test(source_data: list) -> tuple:
-    random.shuffle(source_data)
+def split_data_into_train_and_test(data: list) -> tuple:
+    # Shuffle the data so different Pikachus and Pichus appear in the train/test data
+    # Otherwise the accuracy will be the same every attempt
+    random.shuffle(data)
 
-    pikachu_data = []
-    pichu_data = []
-    for datapoint in source_data:
-        if datapoint["label"] == 1:
-            pikachu_data.append(datapoint)
-        elif datapoint["label"] == 0:
-            pichu_data.append(datapoint)
+    # Separate the data by labels
+    pikachu_data = [point for point in data if point["label"] == PIKACHU_LABEL]
+    pichu_data = [point for point in data if point["label"] == PICHU_LABEL]
 
-    train_data, test_data = pikachu_data[:50] + pichu_data[:50], pikachu_data[50:75] + pichu_data[50:75]
+    # Train data should be the first 50 Pikachus and 50 Pichus
+    train_data = pikachu_data[:50] + pichu_data[:50]
+
+    # Test data should be the following 25 Pikachus and 25 Pichus
+    test_data = pikachu_data[50:75] + pichu_data[50:75]
 
     random.shuffle(train_data)
     random.shuffle(test_data)
@@ -113,9 +117,9 @@ def split_source_data_into_training_and_test(source_data: list) -> tuple:
     return (train_data, test_data)
 
 
-def get_user_input_pokemon_height() -> list:
+def get_user_input_pokemon_height() -> float:
     while True:
-        height = input("Input the height of the pokemon: ")
+        height = input("Input the height of the pokemon (cm): ")
         try:
             height = float(height)
             if height < 0:
@@ -131,7 +135,7 @@ def get_user_input_pokemon_height() -> list:
 
 def get_user_input_pokemon_width() -> float:
     while True:
-        width = input("Input the width of the pokemon: ")
+        width = input("Input the width of the pokemon (cm): ")
         try:
             width = float(width)
             if width < 0:
@@ -151,21 +155,21 @@ def get_k_nearest_neighbors(P1, points, k) -> list:
     return sorted_points_by_distance[:k]
 
 
-def get_accuracy_from_random_data_split():
-    source_data = get_datapoints()
+def get_accuracy_from_random_data_split() -> float:
+    datapoints = get_datapoints()
 
-    training_points, test_points = split_source_data_into_training_and_test(source_data)
+    train_data, test_data = split_data_into_train_and_test(datapoints)
 
     number_of_TP = 0
     number_of_TN = 0
     total_number = 0
 
-    for test in test_points:
-        point = (test["width"], test["height"])
+    for point_data in test_data:
+        point = (point_data["width"], point_data["height"])
 
         # The exercise said to use the 10 closest points, but I chose 9 to avoid equal split in the classification (5 Pichu, 5 Pikachu)
-        guessed_label = get_classified_label_by_k_nearest_neighbors(point, training_points, k=9)
-        correct_label = test["label"]
+        guessed_label = get_classified_label_by_k_nearest_neighbors(point, train_data, k=9)
+        correct_label = point_data["label"]
 
         total_number += 1
         if guessed_label == 1 and correct_label == 1:
@@ -178,8 +182,8 @@ def get_accuracy_from_random_data_split():
     return accuracy
 
 
-def get_classified_label_by_k_nearest_neighbors(point, training_points, k=9) -> int:
-    nearest_points = get_k_nearest_neighbors(point, training_points, k)
+def get_classified_label_by_k_nearest_neighbors(point, train_data, k=9) -> int:
+    nearest_points = get_k_nearest_neighbors(point, train_data, k)
 
     labels_counter = {}
     for near_point in nearest_points:
