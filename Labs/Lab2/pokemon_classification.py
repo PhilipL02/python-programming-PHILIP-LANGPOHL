@@ -10,7 +10,7 @@ scatter_plot_datapoints(datapoints)
 testpoints = get_testpoints()
 output_classification_for_testpoints(testpoints, datapoints)
 
-# Let user input height and weight and create point of input values
+# Let user input width and height and create point of input values
 user_pokemon_width = get_user_input_pokemon_width()
 user_pokemon_height = get_user_input_pokemon_height()
 user_point = (user_pokemon_width, user_pokemon_height)
