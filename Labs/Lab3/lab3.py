@@ -1,13 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from lab3_utils import calculate_y_on_separator
 
 # Constants
 PATH_TO_DATA_FOLDER = "Labs/Lab3/Data"
-
-def calculate_y_on_separator(x: float) -> float:
-    # The line equation developed in the preparatory assignment, to seperate points evenly
-    # Returns the y-value on the separating line for a given x-value.
-    return -0.725 * x + 0.475
 
 
 def get_classification_label_for_point(point: tuple) -> int:
