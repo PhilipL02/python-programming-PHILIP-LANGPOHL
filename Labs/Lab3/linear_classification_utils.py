@@ -1,3 +1,6 @@
+# This file contains functions used in the main script and in the report.
+# It does not execute any code by itself.
+
 from typing import Callable
 
 def calculate_y_on_separator(x: float) -> float:

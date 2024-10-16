@@ -1,3 +1,6 @@
+# This is the main script of the project.
+# Run this file to perform classification and visualize the results in a graph.
+
 import matplotlib.pyplot as plt
 import numpy as np
 from typing import Callable
