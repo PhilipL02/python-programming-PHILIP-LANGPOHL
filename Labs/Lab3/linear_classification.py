@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from typing import Callable
-from lab3_utils import calculate_y_on_separator, get_classification_label_for_point
+from linear_classification_utils import calculate_y_on_separator, get_classification_label_for_point
 
 # Constants (Global variables that should not be changed)
 PATH_TO_DATA_FOLDER = "Labs/Lab3/Data"

@@ -1,6 +1,8 @@
 ## Laboration 3 - Linjär klassificering
 
 Detta program läser data från "unlabelled_data.csv", som är en fil som endast innehåller koordinater för punkter.
+Denna fil, samt resultatet av klassificeringen (labelled_data.csv) ligger under mappen "Data".
+Data-mappen finner du i samma mapp som denna README-fil.
 
 Punkterna från denna fil kommer sedan klassificeras med den utvalda funktionen:
 calculate_y_on_separator(x) = -0.725x + 0.475
@@ -13,9 +15,9 @@ Här visas även den linje som avskiljer klasserna.
 
 Den funktion/ekvation som ska användas för att klassificera punkterna sätts till variabeln "function_for_classification".
 I detta fall är det då "calculate_y_on_separator", men denna kan bytas ut för att få en annan klassificering.
-Om man vill testa med t.ex. f(x) som finns i lab3_utils.py, så kan denna importeras och sättas till "function_for_classification".
+Om man vill testa med t.ex. f(x) som finns i linear_classification_utils.py, så kan denna importeras och sättas till "function_for_classification".
 Då kommer grafen se annorlunda ut, samt "labelled_data.csv" kommer få annat resultat.
 
 För att se att "labelled_data.csv" genereras när program körs, kan denna fil tas bort innan program körs.
 
-Programmet körs från python-filen lab3.py.
+Programmet körs från python-filen linear_classification.py.
