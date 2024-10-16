@@ -1,24 +1,37 @@
 ## Laboration 3 - Linjär klassificering
 
-Detta program läser data från "unlabelled_data.csv", som är en fil som endast innehåller koordinater för punkter.
-Denna fil, samt resultatet av klassificeringen (labelled_data.csv) ligger under mappen "Data".
-Data-mappen finner du i samma mapp som denna README-fil.
+Detta program läser data från <code>unlabelled_data.csv</code>, som är en fil som endast innehåller koordinater för punkter.
+Denna fil, samt resultatet av klassificeringen (<code>labelled_data.csv</code>) ligger under mappen <code>Data</code>.
+Mappen <code>Data</code> hittar du i samma mapp som denna README-fil.
 
-Punkterna från denna fil kommer sedan klassificeras med den utvalda funktionen:
-calculate_y_on_separator(x) = -0.725x + 0.475
+### Klassificering
 
-För varje punkt som klassificerats så skrivs koordinaterna ihop med den label som punkten har fått till "labelled_data.csv".
+Punkterna från filen <code>unlabelled_data.csv</code> klassificeras med hjälp av den utvalda funktionen:
+<code>calculate_y_on_separator(x) = -0.725x + 0.475</code>
 
-Punkterna från "unlabelled_data.csv" kommer även målas upp i en graf med hjälp av _matplotlib.pyplot_.
-I denna graf är punkterna klassificerade och målas då upp i olika färger beroende på klass.
-Här visas även den linje som avskiljer klasserna.
+För varje punkt jämförs dess y-koordinat med värdet som beräknas av funktionen för samma x-koordinat. Om punktens y-värde är större än funktionens värde, tilldelas den klass (label) 1, annars får den klass 0.
 
-Den funktion/ekvation som ska användas för att klassificera punkterna sätts till variabeln "function_for_classification".
-I detta fall är det då "calculate_y_on_separator", men denna kan bytas ut för att få en annan klassificering.
-Om man vill testa med t.ex. f(x) som finns i linear_classification_utils.py, så kan denna importeras och sättas till "function_for_classification".
-Då kommer grafen se annorlunda ut, samt "labelled_data.csv" kommer få annat resultat.
+De klassificerade punkternas koordinater och deras tilldelade klass sparas i filen <code>labelled_data.csv</code>.
 
-För att se att "labelled_data.csv" genereras när program körs, kan denna fil tas bort innan program körs.
+### Visualisering
 
-Programmet körs från python-filen linear_classification.py.
-För att köra python-filen kan du använda kommandot "python Labs/Lab3/linear_classification.py" i din terminal, om du har klonat hela repositoryt och befinner dig i huvudmappen för repot.
+Programmet använder biblioteket _matplotlib.pyplot_ för att visualisera punkterna från <code>unlabelled_data.csv</code>. Klassificerade punkter visas i olika färger beroende på klass, och den separerande linjen ritas också upp i grafen.
+
+### Anpassa klassificeringsfunktionen
+
+Den funktion som används för att klassificera punkterna anges via variabeln <code>function_for_classification</code>.
+För nuvarande är detta <code>calculate_y_on_separator</code>, men denna kan bytas ut för att få en annan klassificering.
+
+Till exempel kan du använda <code>f(x) = -0.489x</code> som finns definierad i <code>linear_classification_utils.py</code>. 
+För att göra detta, importera funktionen och tilldela den till <code>function_for_classification</code>. Detta kommer att förändra både grafens utseende och resultatet i <code>labelled_data.csv</code>.
+
+### Så här kör du programmet
+
+Programmet körs från python-filen <code>linear_classification.py</code>.
+
+#### Köra programmet från terminalen
+
+Om du har klonat hela repot och befinner dig i huvudmappen, kör följande kommando i din terminal:
+```bash
+python Labs/Lab3/linear_classification.py
+```
