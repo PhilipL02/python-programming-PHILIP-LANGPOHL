@@ -21,3 +21,4 @@ Då kommer grafen se annorlunda ut, samt "labelled_data.csv" kommer få annat re
 För att se att "labelled_data.csv" genereras när program körs, kan denna fil tas bort innan program körs.
 
 Programmet körs från python-filen linear_classification.py.
+För att köra python-filen kan du använda kommandot "python Labs/Lab3/linear_classification.py" i din terminal, om du har klonat hela repositoryt och befinner dig i huvudmappen för repot.
